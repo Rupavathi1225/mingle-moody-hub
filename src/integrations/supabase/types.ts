@@ -14,7 +14,153 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analytics: {
+        Row: {
+          clicks: number | null
+          country: string | null
+          device: string | null
+          id: string
+          ip_address: string
+          page_views: number | null
+          related_searches: number | null
+          result_clicks: number | null
+          session_id: string
+          source: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          clicks?: number | null
+          country?: string | null
+          device?: string | null
+          id?: string
+          ip_address: string
+          page_views?: number | null
+          related_searches?: number | null
+          result_clicks?: number | null
+          session_id: string
+          source?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          clicks?: number | null
+          country?: string | null
+          device?: string | null
+          id?: string
+          ip_address?: string
+          page_views?: number | null
+          related_searches?: number | null
+          result_clicks?: number | null
+          session_id?: string
+          source?: string | null
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          serial_number: number
+          title: string
+          updated_at: string | null
+          webresult_page: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          serial_number: number
+          title: string
+          updated_at?: string | null
+          webresult_page: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          serial_number?: number
+          title?: string
+          updated_at?: string | null
+          webresult_page?: string
+        }
+        Relationships: []
+      }
+      landing_page: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      web_results: {
+        Row: {
+          access_type: string
+          allowed_countries: Json | null
+          backlink_url: string | null
+          created_at: string | null
+          description: string
+          id: string
+          imported_from: string | null
+          is_sponsored: boolean | null
+          logo_url: string | null
+          offer_name: string | null
+          original_link: string
+          serial_number: number
+          title: string
+          updated_at: string | null
+          webresult_page: string
+        }
+        Insert: {
+          access_type?: string
+          allowed_countries?: Json | null
+          backlink_url?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          imported_from?: string | null
+          is_sponsored?: boolean | null
+          logo_url?: string | null
+          offer_name?: string | null
+          original_link: string
+          serial_number: number
+          title: string
+          updated_at?: string | null
+          webresult_page: string
+        }
+        Update: {
+          access_type?: string
+          allowed_countries?: Json | null
+          backlink_url?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          imported_from?: string | null
+          is_sponsored?: boolean | null
+          logo_url?: string | null
+          offer_name?: string | null
+          original_link?: string
+          serial_number?: number
+          title?: string
+          updated_at?: string | null
+          webresult_page?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
