@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { LandingPage, Category } from "@/types/database";
 import { trackPageView, trackClick } from "@/utils/analytics";
-import { Button } from "@/components/ui/button";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -12,44 +11,55 @@ const Landing = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
+    // Track a page view when the landing page loads
     trackPageView("landing");
+    fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
       // Fetch landing page content
-      const { data: lpData } = await supabase
+      const { data: lpData, error: lpError } = await supabase
         .from("landing_page")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
+      if (lpError) throw lpError;
+
       // Fetch categories sorted by serial number
-      const { data: catData } = await supabase
+      const { data: catData, error: catError } = await supabase
         .from("categories")
         .select("*")
         .order("serial_number", { ascending: true });
 
+      if (catError) throw catError;
+
       setLandingData(lpData);
       setCategories(catData || []);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching landing data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCategoryClick = (webresultPage: string) => {
-    trackClick("related_search");
-    navigate(`/webresult?${webresultPage}`);
+  const handleCategoryClick = async (webresultPage: string) => {
+    try {
+      // Track related search click
+      await trackClick("related_search");
+      navigate(`/webresult?${webresultPage}`);
+    } catch (error) {
+      console.error("Error tracking click:", error);
+      navigate(`/webresult?${webresultPage}`);
+    }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-primary text-xl">Loading...</div>
+        <div className="text-primary text-xl animate-pulse">Loading...</div>
       </div>
     );
   }
@@ -60,14 +70,6 @@ const Landing = () => {
       <header className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-primary">Minglemoody</h1>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/admin")}
-            className="border-primary/30 text-primary hover:bg-primary/10"
-          >
-            Admin
-          </Button>
         </div>
       </header>
 

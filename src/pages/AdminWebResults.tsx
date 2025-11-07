@@ -25,6 +25,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// 🌍 Full list of countries
+const allCountries = [
+  "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan",
+  "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia",
+  "Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada",
+  "Cape Verde","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Croatia",
+  "Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador",
+  "Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia",
+  "Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guyana","Haiti","Honduras",
+  "Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica",
+  "Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon",
+  "Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives",
+  "Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Monaco","Mongolia","Montenegro","Morocco",
+  "Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria",
+  "North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru",
+  "Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Samoa",
+  "San Marino","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands",
+  "Somalia","South Africa","South Korea","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria",
+  "Taiwan","Tajikistan","Tanzania","Thailand","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan",
+  "Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City",
+  "Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
+];
+
 const AdminWebResults = () => {
   const [results, setResults] = useState<WebResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,7 +137,6 @@ const AdminWebResults = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this result?")) return;
-
     try {
       await supabase.from("web_results").delete().eq("id", id);
       toast.success("Result deleted successfully");
@@ -146,6 +168,14 @@ const AdminWebResults = () => {
       backlink_url: "",
       imported_from: "",
     });
+  };
+
+  const toggleCountry = (country: string) => {
+    const alreadySelected = formData.allowed_countries.includes(country);
+    const updatedCountries = alreadySelected
+      ? formData.allowed_countries.filter(c => c !== country)
+      : [...formData.allowed_countries, country];
+    setFormData({ ...formData, allowed_countries: updatedCountries });
   };
 
   return (
@@ -289,7 +319,9 @@ const AdminWebResults = () => {
                       </div>
 
                       <div className="border-t border-border pt-4">
-                        <h3 className="font-semibold mb-3 text-foreground">Country Access Settings</h3>
+                        <h3 className="font-semibold mb-3 text-foreground">
+                          Country Access Settings
+                        </h3>
                         <Select
                           value={formData.access_type}
                           onValueChange={(value: "worldwide" | "selected_countries") =>
@@ -307,21 +339,19 @@ const AdminWebResults = () => {
 
                         {formData.access_type === "selected_countries" && (
                           <>
-                            <div className="mt-3">
-                              <Label>Allowed Countries (comma-separated)</Label>
-                              <Input
-                                value={formData.allowed_countries.join(", ")}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    allowed_countries: e.target.value
-                                      .split(",")
-                                      .map((c) => c.trim()),
-                                  })
-                                }
-                                placeholder="US, UK, CA"
-                                className="bg-background border-border"
-                              />
+                            <div className="mt-3 space-y-2">
+                              <Label>Select Allowed Countries</Label>
+                              <div className="max-h-48 overflow-y-auto border p-2 rounded-md bg-background">
+                                {allCountries.map((country) => (
+                                  <div key={country} className="flex items-center space-x-2">
+                                    <Checkbox
+                                      checked={formData.allowed_countries.includes(country)}
+                                      onCheckedChange={() => toggleCountry(country)}
+                                    />
+                                    <Label>{country}</Label>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                             <div className="mt-3">
                               <Label>Backlink URL (for blocked countries)</Label>

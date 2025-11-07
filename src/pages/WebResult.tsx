@@ -9,44 +9,53 @@ import { ExternalLink } from "lucide-react";
 const WebResultPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const wrParam = Array.from(searchParams.keys())[0] || "wr=1";
-  
+  const wrParam = searchParams.get("wr") || "1";
+
   const [sponsored, setSponsored] = useState<WebResult[]>([]);
   const [regular, setRegular] = useState<WebResult[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Track page view for this webresult page
+    trackPageView(`webresult?wr=${wrParam}`);
     fetchResults();
-    trackPageView(`webresult?${wrParam}`);
   }, [wrParam]);
 
   const fetchResults = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("web_results")
         .select("*")
         .eq("webresult_page", wrParam)
         .order("serial_number", { ascending: true });
 
+      if (error) throw error;
+
       if (data) {
-        const typedData = data.map(r => ({
+        const typedData = data.map((r) => ({
           ...r,
           access_type: r.access_type as "worldwide" | "selected_countries",
-          allowed_countries: (r.allowed_countries as any) || []
+          allowed_countries: (r.allowed_countries as any) || [],
         }));
         setSponsored(typedData.filter((r) => r.is_sponsored));
         setRegular(typedData.filter((r) => !r.is_sponsored));
       }
     } catch (error) {
-      console.error("Error fetching results:", error);
+      console.error("Error fetching web results:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVisit = (result: WebResult) => {
-    trackClick("result");
-    window.open(result.original_link, "_blank");
+  const handleVisit = async (result: WebResult) => {
+    try {
+      // Track a result click
+      await trackClick("result");
+      window.open(result.original_link, "_blank");
+    } catch (error) {
+      console.error("Error tracking result click:", error);
+      window.open(result.original_link, "_blank");
+    }
   };
 
   const ResultCard = ({ result }: { result: WebResult }) => (
@@ -85,7 +94,7 @@ const WebResultPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-primary text-xl">Loading...</div>
+        <div className="text-primary text-xl animate-pulse">Loading...</div>
       </div>
     );
   }
@@ -101,14 +110,6 @@ const WebResultPage = () => {
           >
             Minglemoody
           </button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/admin")}
-            className="border-primary/30 text-primary hover:bg-primary/10"
-          >
-            Admin
-          </Button>
         </div>
       </header>
 
@@ -127,7 +128,7 @@ const WebResultPage = () => {
           </section>
         )}
 
-        {/* Web Results */}
+        {/* Regular Web Results */}
         {regular.length > 0 && (
           <section>
             <h2 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">
@@ -141,6 +142,7 @@ const WebResultPage = () => {
           </section>
         )}
 
+        {/* Empty State */}
         {sponsored.length === 0 && regular.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             No results found for this page.
