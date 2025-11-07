@@ -45,4 +45,19 @@ export interface Analytics {
   related_searches: number;
   result_clicks: number;
   timestamp: string;
+  time_spent?: number;
+  unique_clicks?: number; // Add this
+}
+
+// Add this new interface
+export interface ClickEvent {
+  id: string;
+  session_id: string;
+  event_type: 'related_search' | 'result_click';
+  search_term: string | null;
+  target_url: string | null;
+  ip_address: string | null;
+  country: string | null;
+  device: string | null;
+  timestamp: string;
 }

@@ -47,17 +47,17 @@ const WebResultPage = () => {
     }
   };
 
-  const handleVisit = async (result: WebResult) => {
-    try {
-      // Track a result click
-      await trackClick("result");
-      window.open(result.original_link, "_blank");
-    } catch (error) {
-      console.error("Error tracking result click:", error);
-      window.open(result.original_link, "_blank");
-    }
-  };
-
+ const handleVisit = async (result: WebResult) => {
+  try {
+    // Track result click with title and URL
+    await trackClick("result", result.title, result.original_link);
+    
+    window.open(result.original_link, "_blank");
+  } catch (error) {
+    console.error("Error tracking result click:", error);
+    window.open(result.original_link, "_blank");
+  }
+};
   const ResultCard = ({ result }: { result: WebResult }) => (
     <div className="py-4 border-b border-border last:border-0">
       <div className="flex items-start gap-4">

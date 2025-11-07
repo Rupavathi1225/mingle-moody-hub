@@ -45,16 +45,19 @@ const Landing = () => {
     }
   };
 
-  const handleCategoryClick = async (webresultPage: string) => {
-    try {
-      // Track related search click
-      await trackClick("related_search");
-      navigate(`/webresult?${webresultPage}`);
-    } catch (error) {
-      console.error("Error tracking click:", error);
-      navigate(`/webresult?${webresultPage}`);
-    }
-  };
+  const handleCategoryClick = async (category: Category) => {
+  try {
+    const targetUrl = `/webresult?${category.webresult_page}`;
+    
+    // Track related search click with search term and URL
+    await trackClick("related_search", category.title, targetUrl);
+    
+    navigate(targetUrl);
+  } catch (error) {
+    console.error("Error tracking click:", error);
+    navigate(`/webresult?${category.webresult_page}`);
+  }
+};
 
   if (loading) {
     return (
@@ -91,15 +94,15 @@ const Landing = () => {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => handleCategoryClick(category.webresult_page)}
-              className="p-6 bg-card border border-border rounded-lg hover:border-primary transition-all hover:shadow-[0_0_20px_rgba(0,255,255,0.3)] text-left group"
-            >
-              <h4 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                {category.title}
-              </h4>
-            </button>
+           <button
+  key={category.id}
+  onClick={() => handleCategoryClick(category)} // Pass entire category object
+  className="p-6 bg-card border border-border rounded-lg hover:border-primary transition-all hover:shadow-[0_0_20px_rgba(0,255,255,0.3)] text-left group"
+>
+  <h4 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+    {category.title}
+  </h4>
+</button>
           ))}
         </div>
       </section>

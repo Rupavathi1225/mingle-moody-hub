@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const getSessionId = (): string => {
   let sessionId = sessionStorage.getItem("session_id");
   if (!sessionId) {
-    sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    sessionId = `session_${Date.now()}${Math.random().toString(36).substring(2, 15)}`;
     sessionStorage.setItem("session_id", sessionId);
   }
   return sessionId;
@@ -47,39 +47,97 @@ export const trackPageView = async (page: string) => {
   const country = await getCountry(ipAddress);
   const device = getDevice();
 
-  await supabase.from("analytics").insert({
-    session_id: sessionId,
-    ip_address: ipAddress,
-    country,
-    device,
-    source: page,
-    page_views: 1,
-    clicks: 0,
-    related_searches: 0,
-    result_clicks: 0,
-  });
+  // Check if session already exists
+  const { data: existing } = await supabase
+    .from("analytics")
+    .select("*")
+    .eq("session_id", sessionId)
+    .maybeSingle();
+
+  if (existing) {
+    // Update existing session
+    await supabase
+      .from("analytics")
+      .update({
+        page_views: (existing.page_views || 0) + 1,
+      })
+      .eq("session_id", sessionId);
+  } else {
+    // Create new session
+    await supabase.from("analytics").insert({
+      session_id: sessionId,
+      ip_address: ipAddress,
+      country,
+      device,
+      source: page,
+      page_views: 1,
+      clicks: 0,
+      related_searches: 0,
+      result_clicks: 0,
+      unique_clicks: 0,
+    });
+  }
 };
 
-// Track click
-export const trackClick = async (type: "related_search" | "result") => {
+// Track click with search term
+export const trackClick = async (
+  type: "related_search" | "result",
+  searchTerm: string,
+  targetUrl: string
+) => {
   const sessionId = getSessionId();
   const ipAddress = await getIPAddress();
   const country = await getCountry(ipAddress);
   const device = getDevice();
 
-  const data: any = {
-    session_id: sessionId,
-    ip_address: ipAddress,
-    country,
-    device,
-    clicks: 1,
-  };
+  try {
+    // Insert into click_events table
+    await supabase.from("click_events").insert({
+      session_id: sessionId,
+      event_type: type,
+      search_term: searchTerm,
+      target_url: targetUrl,
+      ip_address: ipAddress,
+      country,
+      device,
+    });
 
-  if (type === "related_search") {
-    data.related_searches = 1;
-  } else {
-    data.result_clicks = 1;
+    // Get existing analytics record
+    const { data: existing } = await supabase
+      .from("analytics")
+      .select("*")
+      .eq("session_id", sessionId)
+      .maybeSingle();
+
+    if (existing) {
+      // Calculate unique clicks (count distinct target URLs)
+      const { data: uniqueTargets } = await supabase
+        .from("click_events")
+        .select("target_url")
+        .eq("session_id", sessionId);
+
+      const uniqueCount = new Set(
+        uniqueTargets?.map((t) => t.target_url) || []
+      ).size;
+
+      // Update analytics with incremented counters
+      const updateData: any = {
+        clicks: (existing.clicks || 0) + 1,
+        unique_clicks: uniqueCount,
+      };
+
+      if (type === "related_search") {
+        updateData.related_searches = (existing.related_searches || 0) + 1;
+      } else {
+        updateData.result_clicks = (existing.result_clicks || 0) + 1;
+      }
+
+      await supabase
+        .from("analytics")
+        .update(updateData)
+        .eq("session_id", sessionId);
+    }
+  } catch (error) {
+    console.error("Error tracking click:", error);
   }
-
-  await supabase.from("analytics").insert(data);
 };
