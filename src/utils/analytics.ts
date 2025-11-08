@@ -1,5 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
 
+let sessionStartTime: number | null = null;
+let lastActivityTime: number | null = null;
+let timeSpentInterval: NodeJS.Timeout | null = null;
+
 // Generate or retrieve session ID
 export const getSessionId = (): string => {
   let sessionId = sessionStorage.getItem("session_id");
@@ -47,6 +51,35 @@ export const trackPageView = async (page: string) => {
   const country = await getCountry(ipAddress);
   const device = getDevice();
 
+  // Initialize time tracking
+  if (!sessionStartTime) {
+    sessionStartTime = Date.now();
+    lastActivityTime = Date.now();
+
+    // Track time spent - update every 5 seconds
+    if (timeSpentInterval) {
+      clearInterval(timeSpentInterval);
+    }
+
+    timeSpentInterval = setInterval(() => {
+      updateTimeSpent(sessionId);
+    }, 5000);
+
+    // Track time on page visibility change
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        updateTimeSpent(sessionId);
+      } else {
+        lastActivityTime = Date.now();
+      }
+    });
+
+    // Track time before unload
+    window.addEventListener('beforeunload', () => {
+      updateTimeSpent(sessionId);
+    });
+  }
+
   // Check if session already exists
   const { data: existing } = await supabase
     .from("analytics")
@@ -76,6 +109,22 @@ export const trackPageView = async (page: string) => {
       result_clicks: 0,
       unique_clicks: 0,
     });
+  }
+};
+
+const updateTimeSpent = async (sessionId: string) => {
+  if (!lastActivityTime || !sessionStartTime) return;
+
+  const currentTime = Date.now();
+  const timeSpent = Math.floor((currentTime - sessionStartTime) / 1000); // in seconds
+
+  try {
+    await (supabase as any)
+      .from('analytics')
+      .update({ time_spent: timeSpent })
+      .eq('session_id', sessionId);
+  } catch (error) {
+    console.error('Error updating time spent:', error);
   }
 };
 

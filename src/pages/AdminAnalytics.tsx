@@ -388,9 +388,9 @@ const AdminAnalytics = () => {
                                   <TableCell>
                                     {relatedSearchBreakdown.length > 0 ? (
                                       <div className="space-y-2">
-                                        <div className="bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded text-center">
-                                          <span className="text-sm font-medium">Total: {item.related_searches}</span>
-                                        </div>
+                                         <div className="bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 px-3 py-2 rounded-lg text-center">
+                                           <span className="text-sm font-semibold text-green-800 dark:text-green-200">Total: {item.related_searches}</span>
+                                         </div>
                                         <Collapsible>
                                           <CollapsibleTrigger asChild>
                                             <Button
@@ -433,16 +433,16 @@ const AdminAnalytics = () => {
                                         </Collapsible>
                                       </div>
                                     ) : (
-                                      <div className="bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded text-center">
-                                        <span className="text-sm font-medium">Total: 0</span>
+                                      <div className="bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 px-3 py-2 rounded-lg text-center">
+                                        <span className="text-sm font-semibold text-green-800 dark:text-green-200">Total: 0</span>
                                       </div>
                                     )}
                                   </TableCell>
                                   <TableCell>
                                     {resultClickBreakdown.length > 0 ? (
                                       <div className="space-y-2">
-                                        <div className="bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded text-center">
-                                          <span className="text-sm font-medium">Total: {item.result_clicks}</span>
+                                        <div className="bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 px-3 py-2 rounded-lg text-center">
+                                          <span className="text-sm font-semibold text-orange-800 dark:text-orange-200">Total: {item.result_clicks}</span>
                                         </div>
                                         <Collapsible>
                                           <CollapsibleTrigger asChild>
@@ -485,13 +485,15 @@ const AdminAnalytics = () => {
                                         </Collapsible>
                                       </div>
                                     ) : (
-                                      <div className="bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded text-center">
-                                        <span className="text-sm font-medium">Total: 0</span>
+                                      <div className="bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 px-3 py-2 rounded-lg text-center">
+                                        <span className="text-sm font-semibold text-orange-800 dark:text-orange-200">Total: 0</span>
                                       </div>
                                     )}
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    {item.time_spent ? `${item.time_spent}s` : "0s"}
+                                    <span className="font-medium">
+                                      {Math.floor(((item as any).time_spent || 0) / 60)}m {((item as any).time_spent || 0) % 60}s
+                                    </span>
                                   </TableCell>
                                   <TableCell className="text-xs">
                                     {new Date(item.timestamp).toLocaleString()}

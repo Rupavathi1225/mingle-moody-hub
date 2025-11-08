@@ -9,6 +9,7 @@ import Admin from "./pages/Admin";
 import AdminCategories from "./pages/AdminCategories";
 import AdminWebResults from "./pages/AdminWebResults";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import PreLandingBuilder from "./pages/PreLandingBuilder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/admin/categories" element={<AdminCategories />} />
           <Route path="/admin/webresults" element={<AdminWebResults />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/builder" element={<PreLandingBuilder />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
