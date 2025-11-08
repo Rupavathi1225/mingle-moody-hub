@@ -92,7 +92,7 @@ export const trackClick = async (
 
   try {
     // Insert into click_events table
-    await supabase.from("click_events").insert({
+    await (supabase as any).from("click_events").insert({
       session_id: sessionId,
       event_type: type,
       search_term: searchTerm,
@@ -111,13 +111,13 @@ export const trackClick = async (
 
     if (existing) {
       // Calculate unique clicks (count distinct target URLs)
-      const { data: uniqueTargets } = await supabase
+      const { data: uniqueTargets } = await (supabase as any)
         .from("click_events")
         .select("target_url")
         .eq("session_id", sessionId);
 
       const uniqueCount = new Set(
-        uniqueTargets?.map((t) => t.target_url) || []
+        uniqueTargets?.map((t: any) => t.target_url) || []
       ).size;
 
       // Update analytics with incremented counters

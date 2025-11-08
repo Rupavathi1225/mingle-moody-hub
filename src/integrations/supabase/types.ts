@@ -26,7 +26,9 @@ export type Database = {
           result_clicks: number | null
           session_id: string
           source: string | null
+          time_spent: number | null
           timestamp: string | null
+          unique_clicks: number | null
         }
         Insert: {
           clicks?: number | null
@@ -39,7 +41,9 @@ export type Database = {
           result_clicks?: number | null
           session_id: string
           source?: string | null
+          time_spent?: number | null
           timestamp?: string | null
+          unique_clicks?: number | null
         }
         Update: {
           clicks?: number | null
@@ -52,7 +56,45 @@ export type Database = {
           result_clicks?: number | null
           session_id?: string
           source?: string | null
+          time_spent?: number | null
           timestamp?: string | null
+          unique_clicks?: number | null
+        }
+        Relationships: []
+      }
+      analytics_events: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          device: string | null
+          event_label: string | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          session_id: string
+          source: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          device?: string | null
+          event_label?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          session_id: string
+          source?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          device?: string | null
+          event_label?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          session_id?: string
+          source?: string | null
         }
         Relationships: []
       }
@@ -80,6 +122,42 @@ export type Database = {
           title?: string
           updated_at?: string | null
           webresult_page?: string
+        }
+        Relationships: []
+      }
+      click_events: {
+        Row: {
+          country: string | null
+          device: string | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          search_term: string | null
+          session_id: string
+          target_url: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          country?: string | null
+          device?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          search_term?: string | null
+          session_id: string
+          target_url?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          country?: string | null
+          device?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          search_term?: string | null
+          session_id?: string
+          target_url?: string | null
+          timestamp?: string | null
         }
         Relationships: []
       }
@@ -166,7 +244,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      record_analytics_event: {
+        Args: {
+          p_country: string
+          p_device: string
+          p_event_type: string
+          p_ip: string
+          p_session_id: string
+          p_source: string
+        }
+        Returns: undefined
+      }
+      track_event: {
+        Args: { p_event_type: string; p_session_id: string; p_target: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

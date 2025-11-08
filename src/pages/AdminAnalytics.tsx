@@ -44,7 +44,7 @@ const AdminAnalytics = () => {
         setAnalytics(data);
 
         const stats = data.reduce(
-          (acc, item) => ({
+          (acc, item: any) => ({
             totalPageViews: acc.totalPageViews + (item.page_views || 0),
             totalClicks: acc.totalClicks + (item.clicks || 0),
             uniqueClicks: acc.uniqueClicks + (item.unique_clicks || 0),
@@ -73,14 +73,14 @@ const AdminAnalytics = () => {
 
   const fetchClickEvents = async () => {
     try {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("click_events")
         .select("*")
         .order("timestamp", { ascending: false})
         .limit(100);
 
       if (data) {
-        setClickEvents(data);
+        setClickEvents(data as ClickEvent[]);
       }
     } catch (error) {
       console.error("Error fetching click events:", error);
@@ -215,10 +215,10 @@ const AdminAnalytics = () => {
                                           ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
                                           : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                                       }`}
-                                    >
-                                      {event.event_type === "related_search"
-                                        ? "Related Search"
-                                        : "Result Click"}
+                                     >
+                                       {event.event_type === "related_search"
+                                         ? "Related Search"
+                                         : "Result Click"}
                                     </span>
                                   </TableCell>
                                   <TableCell className="font-medium">

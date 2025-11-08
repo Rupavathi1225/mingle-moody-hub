@@ -44,16 +44,16 @@ export interface Analytics {
   clicks: number;
   related_searches: number;
   result_clicks: number;
-  timestamp: string;
+  unique_clicks: number;
   time_spent?: number;
-  unique_clicks?: number; // Add this
+  timestamp: string;
 }
 
 // Add this new interface
 export interface ClickEvent {
   id: string;
   session_id: string;
-  event_type: 'related_search' | 'result_click';
+  event_type: 'related_search' | 'result';
   search_term: string | null;
   target_url: string | null;
   ip_address: string | null;
