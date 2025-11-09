@@ -79,6 +79,17 @@ export default function Prelander() {
     try {
       const sessionId = getSessionId();
       const device = getDevice();
+      
+      // Get IP and country properly
+      const ipAddress = await fetch("https://api.ipify.org?format=json")
+        .then(res => res.json())
+        .then(data => data.ip)
+        .catch(() => "unknown");
+      
+      const country = await fetch(`https://ipapi.co/${ipAddress}/json/`)
+        .then(res => res.json())
+        .then(data => data.country_name || "Unknown")
+        .catch(() => "Unknown");
 
       // Save email to database
       const { error } = await supabase
@@ -88,6 +99,8 @@ export default function Prelander() {
           web_result_id: webResult.id,
           session_id: sessionId,
           device: device,
+          country: country,
+          ip_address: ipAddress,
           redirected_to: webResult.original_link,
         });
 
