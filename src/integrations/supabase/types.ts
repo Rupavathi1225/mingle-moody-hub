@@ -161,6 +161,50 @@ export type Database = {
         }
         Relationships: []
       }
+      email_captures: {
+        Row: {
+          captured_at: string
+          country: string | null
+          device: string | null
+          email: string
+          id: string
+          ip_address: string | null
+          redirected_to: string | null
+          session_id: string | null
+          web_result_id: string | null
+        }
+        Insert: {
+          captured_at?: string
+          country?: string | null
+          device?: string | null
+          email: string
+          id?: string
+          ip_address?: string | null
+          redirected_to?: string | null
+          session_id?: string | null
+          web_result_id?: string | null
+        }
+        Update: {
+          captured_at?: string
+          country?: string | null
+          device?: string | null
+          email?: string
+          id?: string
+          ip_address?: string | null
+          redirected_to?: string | null
+          session_id?: string | null
+          web_result_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_captures_web_result_id_fkey"
+            columns: ["web_result_id"]
+            isOneToOne: false
+            referencedRelation: "web_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       landing_page: {
         Row: {
           created_at: string | null
