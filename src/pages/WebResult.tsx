@@ -47,17 +47,19 @@ const WebResultPage = () => {
     }
   };
 
- const handleVisit = async (result: WebResult) => {
-  try {
-    // Track result click with title and URL
-    await trackClick("result", result.title, result.original_link);
-    
-    window.open(result.original_link, "_blank");
-  } catch (error) {
-    console.error("Error tracking result click:", error);
-    window.open(result.original_link, "_blank");
-  }
-};
+  const handleVisit = async (result: WebResult) => {
+    try {
+      // Track result click with title and URL
+      await trackClick("result", result.title, result.original_link);
+      
+      // Navigate to prelander page with result ID
+      navigate(`/prelander?id=${result.id}`);
+    } catch (error) {
+      console.error("Error tracking result click:", error);
+      // Still navigate even if tracking fails
+      navigate(`/prelander?id=${result.id}`);
+    }
+  };
   const ResultCard = ({ result }: { result: WebResult }) => (
     <div className="py-4 border-b border-border last:border-0">
       <div className="flex items-start gap-4">

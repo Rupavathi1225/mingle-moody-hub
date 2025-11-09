@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, FileText, Grid3x3, BarChart3 } from "lucide-react";
+import { LayoutDashboard, FileText, Grid3x3, BarChart3, Mail } from "lucide-react";
 
 const menuItems = [
   {
@@ -31,6 +31,11 @@ const menuItems = [
     title: "Analytics",
     url: "/admin/analytics",
     icon: BarChart3,
+  },
+  {
+    title: "Email Captures",
+    url: "/admin/emails",
+    icon: Mail,
   },
 ];
 
