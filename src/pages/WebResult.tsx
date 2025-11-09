@@ -23,10 +23,12 @@ const WebResultPage = () => {
 
   const fetchResults = async () => {
     try {
+      // Database stores as "wr=1", "wr=2", etc., so we need to match that format
+      const searchParam = `wr=${wrParam}`;
       const { data, error } = await supabase
         .from("web_results")
         .select("*")
-        .eq("webresult_page", wrParam)
+        .eq("webresult_page", searchParam)
         .order("serial_number", { ascending: true });
 
       if (error) throw error;
