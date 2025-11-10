@@ -83,13 +83,12 @@ export default function AdminEmails() {
       return;
     }
 
-    const headers = ["Email", "Offer", "Date Captured", "Device", "Country", "Redirected To"];
+    const headers = ["Email", "Offer", "Date Captured", "Device", "Redirected To"];
     const rows = filteredEmails.map((item) => [
       item.email,
       item.web_results?.offer_name || item.web_results?.title || "N/A",
       format(new Date(item.captured_at), "PPpp"),
       item.device || "N/A",
-      item.country || "N/A",
       item.redirected_to || "N/A",
     ]);
 
@@ -154,14 +153,13 @@ export default function AdminEmails() {
                 <TableHead>Offer</TableHead>
                 <TableHead>Date Captured</TableHead>
                 <TableHead>Device</TableHead>
-                <TableHead>Country</TableHead>
                 <TableHead>Redirected To</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredEmails.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     No email captures found
                   </TableCell>
                 </TableRow>
@@ -176,7 +174,6 @@ export default function AdminEmails() {
                       {format(new Date(item.captured_at), "MMM dd, yyyy HH:mm")}
                     </TableCell>
                     <TableCell>{item.device || "N/A"}</TableCell>
-                    <TableCell>{item.country || "N/A"}</TableCell>
                     <TableCell className="max-w-xs truncate">
                       {item.redirected_to ? (
                         <a

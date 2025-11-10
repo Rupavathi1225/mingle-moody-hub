@@ -132,8 +132,8 @@ export default function Prelander() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl p-8 space-y-6">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl p-8 space-y-6 bg-white border-border">
         {/* Logo */}
         {webResult.logo_url && (
           <div className="flex justify-center">
@@ -147,10 +147,10 @@ export default function Prelander() {
 
         {/* Offer Name/Title */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-3xl font-bold text-gray-900">
             {webResult.offer_name || webResult.title}
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-gray-600 text-lg">
             {webResult.description}
           </p>
         </div>
@@ -158,7 +158,7 @@ export default function Prelander() {
         {/* Email Capture Form */}
         <form onSubmit={handleSubmit} className="space-y-4 mt-8">
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-foreground block text-center">
+            <label htmlFor="email" className="text-sm font-medium text-gray-900 block text-center">
               Enter your email to continue
             </label>
             <Input
