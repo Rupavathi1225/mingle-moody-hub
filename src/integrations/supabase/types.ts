@@ -229,6 +229,89 @@ export type Database = {
         }
         Relationships: []
       }
+      prelander_configs: {
+        Row: {
+          bg_color: string | null
+          bg_image_url: string | null
+          bg_type: string | null
+          created_at: string
+          cta_bg_color: string | null
+          cta_color: string | null
+          cta_text: string | null
+          description: string | null
+          description_color: string | null
+          description_size: string | null
+          headline: string | null
+          headline_color: string | null
+          headline_size: string | null
+          id: string
+          image_ratio: string | null
+          logo_position: string | null
+          logo_size: string | null
+          logo_url: string | null
+          main_image_url: string | null
+          text_align: string | null
+          updated_at: string
+          web_result_id: string | null
+        }
+        Insert: {
+          bg_color?: string | null
+          bg_image_url?: string | null
+          bg_type?: string | null
+          created_at?: string
+          cta_bg_color?: string | null
+          cta_color?: string | null
+          cta_text?: string | null
+          description?: string | null
+          description_color?: string | null
+          description_size?: string | null
+          headline?: string | null
+          headline_color?: string | null
+          headline_size?: string | null
+          id?: string
+          image_ratio?: string | null
+          logo_position?: string | null
+          logo_size?: string | null
+          logo_url?: string | null
+          main_image_url?: string | null
+          text_align?: string | null
+          updated_at?: string
+          web_result_id?: string | null
+        }
+        Update: {
+          bg_color?: string | null
+          bg_image_url?: string | null
+          bg_type?: string | null
+          created_at?: string
+          cta_bg_color?: string | null
+          cta_color?: string | null
+          cta_text?: string | null
+          description?: string | null
+          description_color?: string | null
+          description_size?: string | null
+          headline?: string | null
+          headline_color?: string | null
+          headline_size?: string | null
+          id?: string
+          image_ratio?: string | null
+          logo_position?: string | null
+          logo_size?: string | null
+          logo_url?: string | null
+          main_image_url?: string | null
+          text_align?: string | null
+          updated_at?: string
+          web_result_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prelander_configs_web_result_id_fkey"
+            columns: ["web_result_id"]
+            isOneToOne: true
+            referencedRelation: "web_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       web_results: {
         Row: {
           access_type: string

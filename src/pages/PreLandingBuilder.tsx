@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Monitor, Smartphone } from "lucide-react";
+import { Monitor, Smartphone, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PreLandingConfig {
   logo: string | null;
@@ -29,6 +30,11 @@ interface PreLandingConfig {
 }
 
 export default function PreLandingBuilder() {
+  const [webResults, setWebResults] = useState<any[]>([]);
+  const [selectedWebResultId, setSelectedWebResultId] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  
   const [config, setConfig] = useState<PreLandingConfig>({
     logo: null,
     logoPosition: "top-center",
@@ -38,18 +44,82 @@ export default function PreLandingBuilder() {
     headline: "Your Headline Here",
     description: "Your description goes here. Tell your visitors what makes your offer special.",
     headlineFontSize: 48,
-    headlineColor: "#ffffff",
+    headlineColor: "#000000",
     headlineAlign: "center",
     descriptionFontSize: 18,
-    descriptionColor: "#e5e5e5",
-    ctaButtonText: "Get Started",
-    ctaButtonColor: "#00ffff",
-    backgroundColor: "#0a0a0a",
+    descriptionColor: "#666666",
+    ctaButtonText: "Continue to Offer",
+    ctaButtonColor: "#000000",
+    backgroundColor: "#ffffff",
     backgroundImage: null,
   });
 
   const [email, setEmail] = useState("");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
+
+  useEffect(() => {
+    fetchWebResults();
+  }, []);
+
+  useEffect(() => {
+    if (selectedWebResultId) {
+      loadConfig();
+    }
+  }, [selectedWebResultId]);
+
+  const fetchWebResults = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("web_results")
+        .select("id, title, offer_name")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setWebResults(data || []);
+    } catch (error) {
+      console.error("Error fetching web results:", error);
+      toast.error("Failed to load web results");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadConfig = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("prelander_configs")
+        .select("*")
+        .eq("web_result_id", selectedWebResultId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setConfig({
+          logo: data.logo_url,
+          logoPosition: data.logo_position as any,
+          logoSize: parseInt(data.logo_size) || 120,
+          mainImage: data.main_image_url,
+          imageRatio: data.image_ratio as any,
+          headline: data.headline || "Your Headline Here",
+          description: data.description || "Your description goes here.",
+          headlineFontSize: parseInt(data.headline_size) || 48,
+          headlineColor: data.headline_color || "#000000",
+          headlineAlign: data.text_align as any,
+          descriptionFontSize: parseInt(data.description_size) || 18,
+          descriptionColor: data.description_color || "#666666",
+          ctaButtonText: data.cta_text || "Continue to Offer",
+          ctaButtonColor: data.cta_bg_color || "#000000",
+          backgroundColor: data.bg_color || "#ffffff",
+          backgroundImage: data.bg_image_url,
+        });
+        toast.success("Configuration loaded");
+      }
+    } catch (error) {
+      console.error("Error loading config:", error);
+      toast.error("Failed to load configuration");
+    }
+  };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -95,9 +165,52 @@ export default function PreLandingBuilder() {
     }
   };
 
-  const handleSave = () => {
-    toast.success("Pre-landing page configuration saved!");
-    console.log("Saved config:", config);
+  const handleSave = async () => {
+    if (!selectedWebResultId) {
+      toast.error("Please select a web result first");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const configData = {
+        web_result_id: selectedWebResultId,
+        logo_url: config.logo,
+        logo_position: config.logoPosition,
+        logo_size: config.logoSize.toString(),
+        main_image_url: config.mainImage,
+        image_ratio: config.imageRatio,
+        headline: config.headline,
+        description: config.description,
+        headline_size: config.headlineFontSize.toString(),
+        headline_color: config.headlineColor,
+        description_size: config.descriptionFontSize.toString(),
+        description_color: config.descriptionColor,
+        text_align: config.headlineAlign,
+        cta_text: config.ctaButtonText,
+        cta_color: "#000000",
+        cta_bg_color: config.ctaButtonColor,
+        bg_type: config.backgroundImage ? "image" : "color",
+        bg_color: config.backgroundColor,
+        bg_image_url: config.backgroundImage,
+      };
+
+      const { error } = await supabase
+        .from("prelander_configs")
+        .upsert(configData, {
+          onConflict: "web_result_id",
+        });
+
+      if (error) throw error;
+
+      toast.success("Pre-landing page configuration saved!");
+    } catch (error) {
+      console.error("Error saving config:", error);
+      toast.error("Failed to save configuration");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getImageRatioClass = () => {
@@ -113,10 +226,37 @@ export default function PreLandingBuilder() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">Pre-Landing Page Builder</h1>
+
+        {/* Web Result Selector */}
+        <Card className="p-6 mb-6">
+          <div className="space-y-2">
+            <Label htmlFor="webResult">Select Web Result / Offer</Label>
+            <Select value={selectedWebResultId} onValueChange={setSelectedWebResultId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a web result to customize" />
+              </SelectTrigger>
+              <SelectContent>
+                {webResults.map((result) => (
+                  <SelectItem key={result.id} value={result.id}>
+                    {result.offer_name || result.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Builder Panel */}
@@ -305,8 +445,19 @@ export default function PreLandingBuilder() {
             </Tabs>
 
             <div className="mt-6 flex gap-3">
-              <Button onClick={handleSave} className="flex-1">
-                Save Configuration
+              <Button 
+                onClick={handleSave} 
+                className="flex-1" 
+                disabled={!selectedWebResultId || saving}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Configuration"
+                )}
               </Button>
             </div>
           </Card>

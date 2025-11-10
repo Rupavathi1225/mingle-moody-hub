@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, FileText, Grid3x3, BarChart3, Mail } from "lucide-react";
+import { LayoutDashboard, FileText, Grid3x3, BarChart3, Mail, Palette } from "lucide-react";
 
 const menuItems = [
   {
@@ -26,6 +26,11 @@ const menuItems = [
     title: "Web Results",
     url: "/admin/webresults",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Prelander Builder",
+    url: "/admin/prelander-builder",
+    icon: Palette,
   },
   {
     title: "Analytics",
