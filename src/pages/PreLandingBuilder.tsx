@@ -121,39 +121,66 @@ export default function PreLandingBuilder() {
     }
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setConfig({ ...config, logo: event.target?.result as string });
-      };
-      reader.readAsDataURL(file);
-      toast.success("Logo uploaded successfully");
+  const uploadImageToStorage = async (file: File, type: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${type}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('prelander-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('prelander-images')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+      return null;
     }
   };
 
-  const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setConfig({ ...config, mainImage: event.target?.result as string });
-      };
-      reader.readAsDataURL(file);
-      toast.success("Main image uploaded successfully");
+      toast.loading("Uploading logo...");
+      const url = await uploadImageToStorage(file, 'logo');
+      if (url) {
+        setConfig({ ...config, logo: url });
+        toast.success("Logo uploaded successfully");
+      }
     }
   };
 
-  const handleBackgroundImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMainImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setConfig({ ...config, backgroundImage: event.target?.result as string });
-      };
-      reader.readAsDataURL(file);
-      toast.success("Background image uploaded successfully");
+      toast.loading("Uploading main image...");
+      const url = await uploadImageToStorage(file, 'main');
+      if (url) {
+        setConfig({ ...config, mainImage: url });
+        toast.success("Main image uploaded successfully");
+      }
+    }
+  };
+
+  const handleBackgroundImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      toast.loading("Uploading background image...");
+      const url = await uploadImageToStorage(file, 'background');
+      if (url) {
+        setConfig({ ...config, backgroundImage: url });
+        toast.success("Background image uploaded successfully");
+      }
     }
   };
 
