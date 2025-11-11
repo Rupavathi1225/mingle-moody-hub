@@ -252,11 +252,12 @@ export default function Prelander() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={submitting}
-                className="text-center text-lg h-12 border-2"
+                className="text-center text-lg h-12 border-2 font-medium"
                 style={{
                   backgroundColor: '#ffffff',
-                  color: '#000000',
-                  borderColor: config.headline_color,
+                  color: '#1a1a1a',
+                  borderColor: config.cta_bg_color || config.headline_color,
+                  borderWidth: '2px',
                 }}
               />
               <Button
