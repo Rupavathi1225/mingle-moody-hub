@@ -252,11 +252,16 @@ export default function Prelander() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={submitting}
-                className="text-center text-lg h-12"
+                className="text-center text-lg h-12 border-2"
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#000000',
+                  borderColor: config.headline_color,
+                }}
               />
               <Button
                 type="submit"
-                className="w-full h-12 text-lg"
+                className="w-full h-12 text-lg font-semibold"
                 disabled={submitting}
                 style={{
                   backgroundColor: config.cta_bg_color,
@@ -275,7 +280,13 @@ export default function Prelander() {
             </form>
 
             {/* Privacy Notice */}
-            <p className="text-xs text-center opacity-60 mt-4">
+            <p 
+              className="text-xs text-center mt-4" 
+              style={{ 
+                color: config.description_color, 
+                opacity: 0.7 
+              }}
+            >
               By submitting your email, you agree to receive promotional offers and updates.
             </p>
           </div>
