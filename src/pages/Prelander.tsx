@@ -252,10 +252,10 @@ export default function Prelander() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={submitting}
-                className="text-center text-lg h-12 border-2 font-medium"
+                className="text-center text-lg h-12 border-2 font-semibold placeholder:text-gray-400"
                 style={{
-                  backgroundColor: '#ffffff',
-                  color: '#1a1a1a',
+                  backgroundColor: '#f8f9fa',
+                  color: '#000000',
                   borderColor: config.cta_bg_color || config.headline_color,
                   borderWidth: '2px',
                 }}
@@ -335,7 +335,11 @@ export default function Prelander() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={submitting}
-              className="text-center text-lg h-12"
+              className="text-center text-lg h-12 border-2 font-semibold placeholder:text-gray-400"
+              style={{
+                backgroundColor: '#f8f9fa',
+                color: '#000000',
+              }}
             />
           </div>
 
