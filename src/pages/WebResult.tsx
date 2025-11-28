@@ -1,10 +1,24 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { WebResult } from "@/types/database";
 import { trackPageView, trackClick } from "@/utils/analytics";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
+
+interface WebResult {
+  id: string;
+  title: string;
+  description: string;
+  target_url: string;
+  logo_url: string | null;
+  page_number: string;
+  position: number;
+  pre_landing_page_key: string | null;
+  is_active: boolean;
+  is_sponsored: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 const WebResultPage = () => {
   const [searchParams] = useSearchParams();
@@ -16,31 +30,24 @@ const WebResultPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Track page view for this webresult page
     trackPageView(`webresult?wr=${wrParam}`);
     fetchResults();
   }, [wrParam]);
 
   const fetchResults = async () => {
     try {
-      // Database stores as "wr=1", "wr=2", etc., so we need to match that format
-      const searchParam = `wr=${wrParam}`;
       const { data, error } = await supabase
         .from("web_results")
         .select("*")
-        .eq("webresult_page", searchParam)
-        .order("serial_number", { ascending: true });
+        .eq("page_number", wrParam)
+        .eq("is_active", true)
+        .order("position", { ascending: true });
 
       if (error) throw error;
 
       if (data) {
-        const typedData = data.map((r) => ({
-          ...r,
-          access_type: r.access_type as "worldwide" | "selected_countries",
-          allowed_countries: (r.allowed_countries as any) || [],
-        }));
-        setSponsored(typedData.filter((r) => r.is_sponsored));
-        setRegular(typedData.filter((r) => !r.is_sponsored));
+        setSponsored(data.filter((r) => r.is_sponsored));
+        setRegular(data.filter((r) => !r.is_sponsored));
       }
     } catch (error) {
       console.error("Error fetching web results:", error);
@@ -51,17 +58,14 @@ const WebResultPage = () => {
 
   const handleVisit = async (result: WebResult) => {
     try {
-      // Track result click with title and URL
-      await trackClick("result", result.title, result.original_link);
-      
-      // Navigate to prelander page with result ID
+      await trackClick("result", result.title, result.target_url);
       navigate(`/prelander?id=${result.id}`);
     } catch (error) {
       console.error("Error tracking result click:", error);
-      // Still navigate even if tracking fails
       navigate(`/prelander?id=${result.id}`);
     }
   };
+
   const ResultCard = ({ result }: { result: WebResult }) => (
     <div className="py-4 border-b border-border last:border-0">
       <div className="flex items-start gap-4">
@@ -72,16 +76,16 @@ const WebResultPage = () => {
             className="w-12 h-12 rounded-full object-cover flex-shrink-0"
           />
         )}
+
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-foreground mb-1">
             {result.title}
           </h3>
-          {result.offer_name && (
-            <p className="text-sm text-primary mb-1">{result.offer_name}</p>
-          )}
+
           <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
             {result.description}
           </p>
+
           <Button
             size="sm"
             onClick={() => handleVisit(result)}
