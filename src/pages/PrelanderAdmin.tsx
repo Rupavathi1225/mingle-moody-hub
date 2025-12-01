@@ -10,10 +10,11 @@ import { toast } from "sonner";
 import { Loader2, Trash2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-interface RelatedSearch {
+interface WebResult {
   id: string;
-  search_text: string;
-  title: string | null;
+  title: string;
+  description: string | null;
+  target_url: string;
 }
 
 interface PreLandingPage {
@@ -31,12 +32,12 @@ interface PreLandingPage {
 }
 
 export default function PrelanderAdmin() {
-  const [relatedSearches, setRelatedSearches] = useState<RelatedSearch[]>([]);
+  const [webResults, setWebResults] = useState<WebResult[]>([]);
   const [preLandingPages, setPreLandingPages] = useState<PreLandingPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const [selectedRelatedSearch, setSelectedRelatedSearch] = useState("");
+  const [selectedWebResult, setSelectedWebResult] = useState("");
   const [headline, setHeadline] = useState("");
   const [description, setDescription] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
@@ -53,11 +54,11 @@ export default function PrelanderAdmin() {
 
   const fetchData = async () => {
     try {
-      const { data: searches } = await supabase
-        .from("related_searches")
-        .select("id, search_text, title")
+      const { data: results } = await supabase
+        .from("web_results")
+        .select("id, title, description, target_url")
         .eq("is_active", true)
-        .order("display_order");
+        .order("page_number, position");
 
       const { data: pages } = await supabase
         .from("pre_landing_pages")
@@ -65,7 +66,7 @@ export default function PrelanderAdmin() {
         .eq("is_active", true)
         .order("created_at", { ascending: false });
 
-      setRelatedSearches(searches || []);
+      setWebResults(results || []);
       setPreLandingPages(pages || []);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -76,7 +77,7 @@ export default function PrelanderAdmin() {
   };
 
   const resetForm = () => {
-    setSelectedRelatedSearch("");
+    setSelectedWebResult("");
     setHeadline("");
     setDescription("");
     setLogoUrl("");
@@ -89,8 +90,8 @@ export default function PrelanderAdmin() {
   };
 
   const handleSave = async () => {
-    if (!selectedRelatedSearch || !headline || !destinationUrl) {
-      toast.error("Please fill in Related Search, Headline, and Destination URL");
+    if (!selectedWebResult || !headline || !destinationUrl) {
+      toast.error("Please fill in Web Result, Headline, and Destination URL");
       return;
     }
 
@@ -117,9 +118,9 @@ export default function PrelanderAdmin() {
       if (error) throw error;
 
       await supabase
-        .from("related_searches")
+        .from("web_results")
         .update({ pre_landing_page_key: pageKey })
-        .eq("id", selectedRelatedSearch);
+        .eq("id", selectedWebResult);
 
       toast.success("Pre-landing page saved successfully!");
       resetForm();
@@ -169,17 +170,17 @@ export default function PrelanderAdmin() {
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="relatedSearch">
-              Related Search <span className="text-destructive">*</span>
+            <Label htmlFor="webResult">
+              Web Result <span className="text-destructive">*</span>
             </Label>
-            <Select value={selectedRelatedSearch} onValueChange={setSelectedRelatedSearch}>
+            <Select value={selectedWebResult} onValueChange={setSelectedWebResult}>
               <SelectTrigger>
-                <SelectValue placeholder="Select related search" />
+                <SelectValue placeholder="Select web result" />
               </SelectTrigger>
               <SelectContent>
-                {relatedSearches.map((search) => (
-                  <SelectItem key={search.id} value={search.id}>
-                    {search.title || search.search_text}
+                {webResults.map((result) => (
+                  <SelectItem key={result.id} value={result.id}>
+                    {result.title}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -307,7 +308,7 @@ export default function PrelanderAdmin() {
             <TableHeader>
               <TableRow>
                 <TableHead>Headline</TableHead>
-                <TableHead>Related Search</TableHead>
+                <TableHead>Target URL</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -315,7 +316,9 @@ export default function PrelanderAdmin() {
               {preLandingPages.map((page) => (
                 <TableRow key={page.id}>
                   <TableCell className="font-medium">{page.headline}</TableCell>
-                  <TableCell>—</TableCell>
+                  <TableCell className="text-xs text-muted-foreground truncate max-w-xs">
+                    {page.target_url}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="destructive"
