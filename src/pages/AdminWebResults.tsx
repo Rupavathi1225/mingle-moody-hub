@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { supabase } from "@/integrations/supabase/client";
-import { WebResult } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,48 +24,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// 🌍 Full list of countries
-const allCountries = [
-  "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan",
-  "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia",
-  "Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada",
-  "Cape Verde","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Croatia",
-  "Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador",
-  "Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia",
-  "Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guyana","Haiti","Honduras",
-  "Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica",
-  "Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon",
-  "Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives",
-  "Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Monaco","Mongolia","Montenegro","Morocco",
-  "Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria",
-  "North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru",
-  "Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Samoa",
-  "San Marino","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands",
-  "Somalia","South Africa","South Korea","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria",
-  "Taiwan","Tajikistan","Tanzania","Thailand","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan",
-  "Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City",
-  "Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
-];
+interface WebResultType {
+  id: string;
+  title: string;
+  description: string | null;
+  target_url: string;
+  logo_url: string | null;
+  page_number: number;
+  position: number;
+  pre_landing_page_key: string | null;
+  is_active: boolean;
+  is_sponsored: boolean | null;
+  created_at: string;
+  updated_at: string;
+}
 
 const AdminWebResults = () => {
-  const [results, setResults] = useState<WebResult[]>([]);
+  const [results, setResults] = useState<WebResultType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPage, setSelectedPage] = useState("wr=1");
-  const [editingResult, setEditingResult] = useState<WebResult | null>(null);
+  const [selectedPage, setSelectedPage] = useState(1);
+  const [editingResult, setEditingResult] = useState<WebResultType | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    original_link: "",
+    target_url: "",
     logo_url: "",
-    webresult_page: "wr=1",
+    page_number: 1,
+    position: 1,
     is_sponsored: false,
-    offer_name: "",
-    serial_number: 1,
-    access_type: "worldwide" as "worldwide" | "selected_countries",
-    allowed_countries: [] as string[],
-    backlink_url: "",
-    imported_from: "",
   });
 
   useEffect(() => {
@@ -75,18 +61,14 @@ const AdminWebResults = () => {
 
   const fetchResults = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("web_results")
         .select("*")
-        .eq("webresult_page", selectedPage)
-        .order("serial_number", { ascending: true });
+        .eq("page_number", selectedPage)
+        .order("position", { ascending: true });
 
-      const typedData = (data || []).map(r => ({
-        ...r,
-        access_type: r.access_type as "worldwide" | "selected_countries",
-        allowed_countries: (r.allowed_countries as any) || []
-      }));
-      setResults(typedData);
+      if (error) throw error;
+      setResults(data || []);
     } catch (error) {
       console.error("Error fetching results:", error);
     } finally {
@@ -103,7 +85,7 @@ const AdminWebResults = () => {
           .eq("id", editingResult.id);
         toast.success("Result updated successfully");
       } else {
-        await supabase.from("web_results").insert(formData);
+        await supabase.from("web_results").insert([formData]);
         toast.success("Result created successfully");
       }
       setIsDialogOpen(false);
@@ -116,21 +98,16 @@ const AdminWebResults = () => {
     }
   };
 
-  const handleEdit = (result: WebResult) => {
+  const handleEdit = (result: WebResultType) => {
     setEditingResult(result);
     setFormData({
       title: result.title,
-      description: result.description,
-      original_link: result.original_link,
+      description: result.description || "",
+      target_url: result.target_url,
       logo_url: result.logo_url || "",
-      webresult_page: result.webresult_page,
-      is_sponsored: result.is_sponsored,
-      offer_name: result.offer_name || "",
-      serial_number: result.serial_number,
-      access_type: result.access_type,
-      allowed_countries: result.allowed_countries,
-      backlink_url: result.backlink_url || "",
-      imported_from: result.imported_from || "",
+      page_number: result.page_number,
+      position: result.position,
+      is_sponsored: result.is_sponsored || false,
     });
     setIsDialogOpen(true);
   };
@@ -157,25 +134,16 @@ const AdminWebResults = () => {
     setFormData({
       title: "",
       description: "",
-      original_link: "",
+      target_url: "",
       logo_url: "",
-      webresult_page: selectedPage,
+      page_number: selectedPage,
+      position: results.length + 1,
       is_sponsored: false,
-      offer_name: "",
-      serial_number: results.length + 1,
-      access_type: "worldwide",
-      allowed_countries: [],
-      backlink_url: "",
-      imported_from: "",
     });
   };
 
   const toggleCountry = (country: string) => {
-    const alreadySelected = formData.allowed_countries.includes(country);
-    const updatedCountries = alreadySelected
-      ? formData.allowed_countries.filter(c => c !== country)
-      : [...formData.allowed_countries, country];
-    setFormData({ ...formData, allowed_countries: updatedCountries });
+    // Not needed for simplified version
   };
 
   return (
@@ -193,14 +161,14 @@ const AdminWebResults = () => {
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-4">
                   <h2 className="text-2xl font-bold text-foreground">Web Results</h2>
-                  <Select value={selectedPage} onValueChange={setSelectedPage}>
+                  <Select value={selectedPage.toString()} onValueChange={(v) => setSelectedPage(parseInt(v))}>
                     <SelectTrigger className="w-32 bg-card border-border">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {[1, 2, 3, 4, 5].map((i) => (
-                        <SelectItem key={i} value={`wr=${i}`}>
-                          wr={i}
+                        <SelectItem key={i} value={i.toString()}>
+                          Page {i}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -231,20 +199,6 @@ const AdminWebResults = () => {
                         <Label htmlFor="sponsored">Sponsored Result</Label>
                       </div>
 
-                      {formData.is_sponsored && (
-                        <div>
-                          <Label>Offer Name</Label>
-                          <Input
-                            value={formData.offer_name}
-                            onChange={(e) =>
-                              setFormData({ ...formData, offer_name: e.target.value })
-                            }
-                            placeholder="Company or offer name"
-                            className="bg-background border-border"
-                          />
-                        </div>
-                      )}
-
                       <div>
                         <Label>Title</Label>
                         <Input
@@ -271,11 +225,11 @@ const AdminWebResults = () => {
                       </div>
 
                       <div>
-                        <Label>Original Link (URL)</Label>
+                        <Label>Target URL</Label>
                         <Input
-                          value={formData.original_link}
+                          value={formData.target_url}
                           onChange={(e) =>
-                            setFormData({ ...formData, original_link: e.target.value })
+                            setFormData({ ...formData, target_url: e.target.value })
                           }
                           placeholder="https://example.com"
                           className="bg-background border-border"
@@ -295,77 +249,15 @@ const AdminWebResults = () => {
                       </div>
 
                       <div>
-                        <Label>Serial Number (Position)</Label>
+                        <Label>Position</Label>
                         <Input
                           type="number"
-                          value={formData.serial_number}
+                          value={formData.position}
                           onChange={(e) =>
-                            setFormData({ ...formData, serial_number: parseInt(e.target.value) })
+                            setFormData({ ...formData, position: parseInt(e.target.value) })
                           }
                           className="bg-background border-border"
                         />
-                      </div>
-
-                      <div>
-                        <Label>Imported From (Optional)</Label>
-                        <Input
-                          value={formData.imported_from}
-                          onChange={(e) =>
-                            setFormData({ ...formData, imported_from: e.target.value })
-                          }
-                          placeholder="Source website name"
-                          className="bg-background border-border"
-                        />
-                      </div>
-
-                      <div className="border-t border-border pt-4">
-                        <h3 className="font-semibold mb-3 text-foreground">
-                          Country Access Settings
-                        </h3>
-                        <Select
-                          value={formData.access_type}
-                          onValueChange={(value: "worldwide" | "selected_countries") =>
-                            setFormData({ ...formData, access_type: value })
-                          }
-                        >
-                          <SelectTrigger className="bg-background border-border">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="worldwide">Allow Worldwide Access</SelectItem>
-                            <SelectItem value="selected_countries">Selected Countries Only</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        {formData.access_type === "selected_countries" && (
-                          <>
-                            <div className="mt-3 space-y-2">
-                              <Label>Select Allowed Countries</Label>
-                              <div className="max-h-48 overflow-y-auto border p-2 rounded-md bg-background">
-                                {allCountries.map((country) => (
-                                  <div key={country} className="flex items-center space-x-2">
-                                    <Checkbox
-                                      checked={formData.allowed_countries.includes(country)}
-                                      onCheckedChange={() => toggleCountry(country)}
-                                    />
-                                    <Label>{country}</Label>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="mt-3">
-                              <Label>Backlink URL (for blocked countries)</Label>
-                              <Input
-                                value={formData.backlink_url}
-                                onChange={(e) =>
-                                  setFormData({ ...formData, backlink_url: e.target.value })
-                                }
-                                placeholder="https://alternative-site.com"
-                                className="bg-background border-border"
-                              />
-                            </div>
-                          </>
-                        )}
                       </div>
 
                       <Button onClick={handleSubmit} className="w-full bg-primary text-primary-foreground">
@@ -396,7 +288,7 @@ const AdminWebResults = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-xs text-muted-foreground font-mono">
-                              #{result.serial_number}
+                              #{result.position}
                             </span>
                             {result.is_sponsored && (
                               <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
@@ -405,9 +297,6 @@ const AdminWebResults = () => {
                             )}
                           </div>
                           <h3 className="font-semibold text-foreground">{result.title}</h3>
-                          {result.offer_name && (
-                            <p className="text-sm text-primary">{result.offer_name}</p>
-                          )}
                           <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                             {result.description}
                           </p>

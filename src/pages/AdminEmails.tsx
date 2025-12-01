@@ -19,14 +19,9 @@ interface EmailCapture {
   id: string;
   email: string;
   captured_at: string;
-  session_id: string | null;
-  device: string | null;
+  page_key: string;
   country: string | null;
-  redirected_to: string | null;
-  web_results?: {
-    title: string;
-    offer_name: string | null;
-  };
+  source: string | null;
 }
 
 export default function AdminEmails() {
@@ -44,8 +39,7 @@ export default function AdminEmails() {
       const filtered = emails.filter(
         (item) =>
           item.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.web_results?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.web_results?.offer_name?.toLowerCase().includes(searchTerm.toLowerCase())
+          item.page_key.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredEmails(filtered);
     } else {
@@ -57,13 +51,7 @@ export default function AdminEmails() {
     try {
       const { data, error } = await supabase
         .from("email_captures")
-        .select(`
-          *,
-          web_results (
-            title,
-            offer_name
-          )
-        `)
+        .select("*")
         .order("captured_at", { ascending: false });
 
       if (error) throw error;
@@ -83,13 +71,13 @@ export default function AdminEmails() {
       return;
     }
 
-    const headers = ["Email", "Offer", "Date Captured", "Device", "Redirected To"];
+    const headers = ["Email", "Page Key", "Date Captured", "Country", "Source"];
     const rows = filteredEmails.map((item) => [
       item.email,
-      item.web_results?.offer_name || item.web_results?.title || "N/A",
+      item.page_key,
       format(new Date(item.captured_at), "PPpp"),
-      item.device || "N/A",
-      item.redirected_to || "N/A",
+      item.country || "N/A",
+      item.source || "N/A",
     ]);
 
     const csvContent = [
@@ -138,7 +126,7 @@ export default function AdminEmails() {
         <div className="flex items-center gap-2 mb-6">
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by email or offer name..."
+            placeholder="Search by email or page key..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-sm"
@@ -150,10 +138,10 @@ export default function AdminEmails() {
             <TableHeader>
               <TableRow>
                 <TableHead>Email</TableHead>
-                <TableHead>Offer</TableHead>
+                <TableHead>Page Key</TableHead>
                 <TableHead>Date Captured</TableHead>
-                <TableHead>Device</TableHead>
-                <TableHead>Redirected To</TableHead>
+                <TableHead>Country</TableHead>
+                <TableHead>Source</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -167,27 +155,12 @@ export default function AdminEmails() {
                 filteredEmails.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.email}</TableCell>
-                    <TableCell>
-                      {item.web_results?.offer_name || item.web_results?.title || "N/A"}
-                    </TableCell>
+                    <TableCell className="text-xs font-mono">{item.page_key}</TableCell>
                     <TableCell>
                       {format(new Date(item.captured_at), "MMM dd, yyyy HH:mm")}
                     </TableCell>
-                    <TableCell>{item.device || "N/A"}</TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {item.redirected_to ? (
-                        <a
-                          href={item.redirected_to}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          {item.redirected_to}
-                        </a>
-                      ) : (
-                        "N/A"
-                      )}
-                    </TableCell>
+                    <TableCell>{item.country || "N/A"}</TableCell>
+                    <TableCell>{item.source || "N/A"}</TableCell>
                   </TableRow>
                 ))
               )}
