@@ -14,15 +14,13 @@ interface LandingPage {
 interface RelatedSearch {
   id: string;
   search_text: string;
-  title: string;
-  web_result_page: string;
-  position: number;
+  title: string | null;
+  web_result_page: number | null;
+  position: number | null;
   pre_landing_page_key: string | null;
   display_order: number;
   allowed_countries: string[] | null;
   is_active: boolean;
-  session_id: string | null;
-  category_id: string | null;
 }
 
 const Landing = () => {

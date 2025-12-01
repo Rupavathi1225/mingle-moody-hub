@@ -8,16 +8,14 @@ import { ExternalLink } from "lucide-react";
 interface WebResult {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   target_url: string;
   logo_url: string | null;
-  page_number: string;
+  page_number: number;
   position: number;
   pre_landing_page_key: string | null;
   is_active: boolean;
-  is_sponsored: boolean;
-  created_at: string;
-  updated_at: string;
+  is_sponsored: boolean | null;
 }
 
 const WebResultPage = () => {
@@ -39,7 +37,7 @@ const WebResultPage = () => {
       const { data, error } = await supabase
         .from("web_results")
         .select("*")
-        .eq("page_number", wrParam)
+        .eq("page_number", parseInt(wrParam))
         .eq("is_active", true)
         .order("position", { ascending: true });
 

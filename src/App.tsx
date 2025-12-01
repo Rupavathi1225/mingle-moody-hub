@@ -11,7 +11,7 @@ import AdminCategories from "./pages/AdminCategories";
 import AdminWebResults from "./pages/AdminWebResults";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminEmails from "./pages/AdminEmails";
-import PreLandingBuilder from "./pages/PreLandingBuilder";
+import PrelanderAdmin from "./pages/PrelanderAdmin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,10 +30,10 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/categories" element={<AdminCategories />} />
           <Route path="/admin/webresults" element={<AdminWebResults />} />
-          <Route path="/admin/prelander-builder" element={<PreLandingBuilder />} />
+          <Route path="/admin/prelander-builder" element={<PrelanderAdmin />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/emails" element={<AdminEmails />} />
-          <Route path="/builder" element={<PreLandingBuilder />} />
+          <Route path="/builder" element={<PrelanderAdmin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
