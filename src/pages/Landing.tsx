@@ -66,14 +66,14 @@ const Landing = () => {
 
   const handleRelatedSearchClick = async (item: RelatedSearch) => {
     try {
-      const targetUrl = `/webresult?${item.web_result_page}`;
+      const targetUrl = `/webresult${item.web_result_page || 1}`;
 
       await trackClick("related_search", item.title, targetUrl);
 
       navigate(targetUrl);
     } catch (error) {
       console.error("Error tracking click:", error);
-      navigate(`/webresult?${item.web_result_page}`);
+      navigate(`/webresult${item.web_result_page || 1}`);
     }
   };
 
