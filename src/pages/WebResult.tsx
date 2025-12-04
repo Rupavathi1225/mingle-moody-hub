@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { trackPageView, trackClick } from "@/utils/analytics";
 import { Button } from "@/components/ui/button";
@@ -19,16 +19,16 @@ interface WebResult {
 }
 
 const WebResultPage = () => {
-  const [searchParams] = useSearchParams();
+  const { pageNum } = useParams();
   const navigate = useNavigate();
-  const wrParam = searchParams.get("wr") || "1";
+  const wrParam = pageNum || "1";
 
   const [sponsored, setSponsored] = useState<WebResult[]>([]);
   const [regular, setRegular] = useState<WebResult[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    trackPageView(`webresult?wr=${wrParam}`);
+    trackPageView(`webresult${wrParam}`);
     fetchResults();
   }, [wrParam]);
 

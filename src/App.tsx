@@ -25,7 +25,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Navigate to="/landing" replace />} />
           <Route path="/landing" element={<Landing />} />
-          <Route path="/webresult" element={<WebResult />} />
+          <Route path="/webresult:pageNum" element={<WebResult />} />
           <Route path="/prelander" element={<Prelander />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/categories" element={<AdminCategories />} />
