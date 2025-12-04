@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -152,188 +153,187 @@ export default function PrelanderAdmin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
+      <AdminLayout title="Pre-Landing Pages">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Teja Starin - Pre-Landing Pages</h1>
-        <p className="text-muted-foreground">Manage all your site-level Pre-Landing Pages</p>
-      </div>
+    <AdminLayout title="Pre-Landing Pages">
+      <div className="max-w-4xl space-y-8">
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-6">Add Pre-Landing Page</h3>
 
-      <Card className="p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-6">Add Pre-Landing Page</h2>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="webResult">
+                Web Result <span className="text-destructive">*</span>
+              </Label>
+              <Select value={selectedWebResult} onValueChange={setSelectedWebResult}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select web result" />
+                </SelectTrigger>
+                <SelectContent>
+                  {webResults.map((result) => (
+                    <SelectItem key={result.id} value={result.id}>
+                      {result.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="webResult">
-              Web Result <span className="text-destructive">*</span>
-            </Label>
-            <Select value={selectedWebResult} onValueChange={setSelectedWebResult}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select web result" />
-              </SelectTrigger>
-              <SelectContent>
-                {webResults.map((result) => (
-                  <SelectItem key={result.id} value={result.id}>
-                    {result.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div>
+              <Label htmlFor="headline">
+                Headline <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="headline"
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
+                placeholder="Enter headline"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter description"
+                rows={4}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="logoUrl">Logo URL</Label>
+              <Input
+                id="logoUrl"
+                value={logoUrl}
+                onChange={(e) => setLogoUrl(e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="logoPosition">Logo Position</Label>
+              <Select value={logoPosition} onValueChange={setLogoPosition}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="top-center">Top Center</SelectItem>
+                  <SelectItem value="top-left">Top Left</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="mainImageUrl">Main Image URL</Label>
+              <Input
+                id="mainImageUrl"
+                value={mainImageUrl}
+                onChange={(e) => setMainImageUrl(e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="backgroundColor">Background Color</Label>
+              <Input
+                id="backgroundColor"
+                type="color"
+                value={backgroundColor}
+                onChange={(e) => setBackgroundColor(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="backgroundImageUrl">Background Image URL</Label>
+              <Input
+                id="backgroundImageUrl"
+                value={backgroundImageUrl}
+                onChange={(e) => setBackgroundImageUrl(e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="buttonText">Button Text</Label>
+              <Input
+                id="buttonText"
+                value={buttonText}
+                onChange={(e) => setButtonText(e.target.value)}
+                placeholder="Visit Now"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="destinationUrl">
+                Destination URL <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="destinationUrl"
+                value={destinationUrl}
+                onChange={(e) => setDestinationUrl(e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+
+            <Button onClick={handleSave} disabled={saving} className="w-full">
+              {saving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Pre-Landing Page"
+              )}
+            </Button>
           </div>
+        </Card>
 
-          <div>
-            <Label htmlFor="headline">
-              Headline <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="headline"
-              value={headline}
-              onChange={(e) => setHeadline(e.target.value)}
-              placeholder="Enter headline"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter description"
-              rows={4}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="logoUrl">Logo URL</Label>
-            <Input
-              id="logoUrl"
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="logoPosition">Logo Position</Label>
-            <Select value={logoPosition} onValueChange={setLogoPosition}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="top-center">Top Center</SelectItem>
-                <SelectItem value="top-left">Top Left</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="mainImageUrl">Main Image URL</Label>
-            <Input
-              id="mainImageUrl"
-              value={mainImageUrl}
-              onChange={(e) => setMainImageUrl(e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="backgroundColor">Background Color</Label>
-            <Input
-              id="backgroundColor"
-              type="color"
-              value={backgroundColor}
-              onChange={(e) => setBackgroundColor(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="backgroundImageUrl">Background Image URL</Label>
-            <Input
-              id="backgroundImageUrl"
-              value={backgroundImageUrl}
-              onChange={(e) => setBackgroundImageUrl(e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="buttonText">Button Text</Label>
-            <Input
-              id="buttonText"
-              value={buttonText}
-              onChange={(e) => setButtonText(e.target.value)}
-              placeholder="Visit Now"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="destinationUrl">
-              Destination URL <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="destinationUrl"
-              value={destinationUrl}
-              onChange={(e) => setDestinationUrl(e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-
-          <Button onClick={handleSave} disabled={saving} className="w-full">
-            {saving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save Pre-Landing Page"
-            )}
-          </Button>
-        </div>
-      </Card>
-
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Pre-Landing Pages</h2>
-        
-        {preLandingPages.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No pre-landing pages yet</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Headline</TableHead>
-                <TableHead>Target URL</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {preLandingPages.map((page) => (
-                <TableRow key={page.id}>
-                  <TableCell className="font-medium">{page.headline}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground truncate max-w-xs">
-                    {page.target_url}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(page.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Pre-Landing Pages</h3>
+          
+          {preLandingPages.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No pre-landing pages yet</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Headline</TableHead>
+                  <TableHead>Target URL</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </Card>
-    </div>
+              </TableHeader>
+              <TableBody>
+                {preLandingPages.map((page) => (
+                  <TableRow key={page.id}>
+                    <TableCell className="font-medium">{page.headline}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground truncate max-w-xs">
+                      {page.target_url}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(page.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </Card>
+      </div>
+    </AdminLayout>
   );
 }
