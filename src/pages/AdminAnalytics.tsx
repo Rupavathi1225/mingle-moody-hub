@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AdminSidebar } from "@/components/AdminSidebar";
+import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Analytics, ClickEvent } from "@/types/database";
 import {
@@ -12,7 +11,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MousePointer, Eye, Grid3x3, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -79,7 +77,7 @@ const AdminAnalytics = () => {
       const { data } = await (supabase as any)
         .from("click_events")
         .select("*")
-        .order("timestamp", { ascending: false})
+        .order("timestamp", { ascending: false })
         .limit(100);
 
       if (data) {
@@ -107,7 +105,6 @@ const AdminAnalytics = () => {
       current.total += 1;
     });
 
-    // Calculate unique clicks per search term
     events.forEach(event => {
       const term = event.search_term || 'Unknown';
       const uniqueTargets = new Set(
@@ -171,348 +168,178 @@ const AdminAnalytics = () => {
   );
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AdminSidebar />
-        <main className="flex-1">
-          <header className="h-12 flex items-center border-b border-border px-4">
-            <SidebarTrigger className="mr-4" />
-            <h1 className="text-xl font-bold text-primary">
-              Analytics Dashboard
-            </h1>
-          </header>
+    <AdminLayout title="Session Analytics">
+      <div className="max-w-7xl">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          <StatCard icon={Eye} label="Page Views" value={stats.totalPageViews} />
+          <StatCard icon={MousePointer} label="Total Clicks" value={stats.totalClicks} />
+          <StatCard icon={MousePointer} label="Unique Clicks" value={stats.uniqueClicks} />
+          <StatCard icon={Grid3x3} label="Related Searches" value={stats.totalRelatedSearches} />
+          <StatCard icon={ExternalLink} label="Result Clicks" value={stats.totalResultClicks} />
+        </div>
 
-          <div className="p-8">
-            <div className="max-w-7xl">
-              <h2 className="text-2xl font-bold text-foreground mb-6">
-                Click Tracking & Analytics
-              </h2>
-
-              {/* Stats Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-                <StatCard
-                  icon={Eye}
-                  label="Page Views"
-                  value={stats.totalPageViews}
-                />
-                <StatCard
-                  icon={MousePointer}
-                  label="Total Clicks"
-                  value={stats.totalClicks}
-                />
-                <StatCard
-                  icon={MousePointer}
-                  label="Unique Clicks"
-                  value={stats.uniqueClicks}
-                />
-                <StatCard
-                  icon={Grid3x3}
-                  label="Related Searches"
-                  value={stats.totalRelatedSearches}
-                />
-                <StatCard
-                  icon={ExternalLink}
-                  label="Result Clicks"
-                  value={stats.totalResultClicks}
-                />
-              </div>
-
-              {/* Tabs */}
-              <Tabs defaultValue="clicks" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="clicks">Click Events</TabsTrigger>
-                  <TabsTrigger value="sessions">Session Analytics</TabsTrigger>
-                </TabsList>
-
-                {/* Click Events Tab */}
-                <TabsContent value="clicks">
-                  <div className="bg-card border border-border rounded-lg overflow-hidden">
-                    <div className="p-4 border-b border-border">
-                      <h3 className="font-semibold text-foreground">
-                        Individual Click Tracking
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Detailed view of each user interaction
-                      </p>
-                    </div>
-
-                    {loading ? (
-                      <div className="p-8 text-center text-primary">
-                        Loading...
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="border-border">
-                              <TableHead>Event Type</TableHead>
-                              <TableHead>Search Term / Query</TableHead>
-                              <TableHead>Target URL</TableHead>
-                              <TableHead>Session ID</TableHead>
-                              <TableHead>IP Address</TableHead>
-                              <TableHead>Country</TableHead>
-                              <TableHead>Device</TableHead>
-                              <TableHead>Timestamp</TableHead>
-                            </TableRow>
-                          </TableHeader>
-
-                          <TableBody>
-                            {clickEvents.length === 0 ? (
-                              <TableRow>
-                                <TableCell
-                                  colSpan={8}
-                                  className="text-center py-8 text-muted-foreground"
-                                >
-                                  No click events yet
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              clickEvents.map((event) => (
-                                <TableRow key={event.id} className="border-border">
-                                  <TableCell>
-                                    <span
-                                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                        event.event_type === "related_search"
-                                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                                          : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                                      }`}
-                                     >
-                                       {event.event_type === "related_search"
-                                         ? "Related Search"
-                                         : "Result Click"}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell className="font-medium">
-                                    {event.search_term || "-"}
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs max-w-xs truncate">
-                                    {event.target_url || "-"}
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    {event.session_id.substring(0, 25)}...
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    {event.ip_address}
-                                  </TableCell>
-                                  <TableCell>{event.country || "-"}</TableCell>
-                                  <TableCell>{event.device || "-"}</TableCell>
-                                  <TableCell className="text-xs">
-                                    {new Date(event.timestamp).toLocaleString()}
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-
-                {/* Session Analytics Tab */}
-                <TabsContent value="sessions">
-                  <div className="bg-card border border-border rounded-lg overflow-hidden">
-                    <div className="p-4 border-b border-border">
-                      <h3 className="font-semibold text-foreground">
-                        Session Analytics
-                      </h3>
-                    </div>
-
-                    {loading ? (
-                      <div className="p-8 text-center text-primary">
-                        Loading...
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="border-border">
-                              <TableHead>Session ID</TableHead>
-                              <TableHead>IP Address</TableHead>
-                              <TableHead>Country</TableHead>
-                              <TableHead>Source</TableHead>
-                              <TableHead>Device</TableHead>
-                              <TableHead className="text-right">
-                                Page Views
-                              </TableHead>
-                              <TableHead className="text-right">
-                                Total Clicks
-                              </TableHead>
-                              <TableHead className="text-right">
-                                Unique Clicks
-                              </TableHead>
-                              <TableHead className="text-right">
-                                Related Searches
-                              </TableHead>
-                              <TableHead className="text-right">
-                                Result Clicks
-                              </TableHead>
-                              <TableHead className="text-right">
-                                Time Spent
-                              </TableHead>
-                              <TableHead>Timestamp</TableHead>
-                            </TableRow>
-                          </TableHeader>
-
-                          <TableBody>
-                            {analytics.map((item) => {
-                              const relatedSearchBreakdown = getRelatedSearchBreakdown(item.session_id);
-                              const resultClickBreakdown = getResultClickBreakdown(item.session_id);
-                              const relatedExpanded = expandedSessions[`${item.session_id}-related`];
-                              const resultExpanded = expandedSessions[`${item.session_id}-result`];
-
-                              return (
-                                <TableRow key={item.id} className="border-border">
-                                  <TableCell className="font-mono text-xs">
-                                    {item.session_id.substring(0, 12)}...
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs">
-                                    {item.ip_address}
-                                  </TableCell>
-                                  <TableCell>{item.country || "-"}</TableCell>
-                                  <TableCell className="text-xs">
-                                    {item.source || "-"}
-                                  </TableCell>
-                                  <TableCell>{item.device || "-"}</TableCell>
-                                  <TableCell className="text-right">
-                                    {item.page_views}
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    {item.clicks}
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    <span className="font-semibold text-primary">
-                                      {item.unique_clicks || 0}
-                                    </span>
-                                  </TableCell>
-                                  <TableCell>
-                                    {relatedSearchBreakdown.length > 0 ? (
-                                      <div className="space-y-2">
-                                         <div className="bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 px-3 py-2 rounded-lg text-center">
-                                           <span className="text-sm font-semibold text-green-800 dark:text-green-200">Total: {item.related_searches}</span>
-                                         </div>
-                                        <Collapsible>
-                                          <CollapsibleTrigger asChild>
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              className="w-full text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                                              onClick={() => toggleSession(item.session_id, 'related')}
-                                            >
-                                              {relatedExpanded ? (
-                                                <>
-                                                  <ChevronUp className="w-3 h-3 mr-1" />
-                                                  Hide breakdown
-                                                </>
-                                              ) : (
-                                                <>
-                                                  <ChevronDown className="w-3 h-3 mr-1" />
-                                                  View breakdown
-                                                </>
-                                              )}
-                                            </Button>
-                                          </CollapsibleTrigger>
-                                          <CollapsibleContent className="space-y-2 mt-2">
-                                            {relatedSearchBreakdown.map((item, idx) => (
-                                              <div key={idx} className="border border-border rounded p-2 bg-card">
-                                                <div className="text-xs font-medium mb-1">{item.term}</div>
-                                                <div className="flex gap-2 text-xs">
-                                                  <span className="text-blue-600 dark:text-blue-400">
-                                                    Total: {item.total}
-                                                  </span>
-                                                  <span className="text-purple-600 dark:text-purple-400">
-                                                    Unique: {item.unique}
-                                                  </span>
-                                                </div>
-                                                <div className="mt-1 text-xs text-muted-foreground">
-                                                  Visit Now Button: <span className="text-green-600 dark:text-green-400">Clicked {item.total}</span>
-                                                </div>
-                                              </div>
-                                            ))}
-                                          </CollapsibleContent>
-                                        </Collapsible>
-                                      </div>
-                                    ) : (
-                                      <div className="bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 px-3 py-2 rounded-lg text-center">
-                                        <span className="text-sm font-semibold text-green-800 dark:text-green-200">Total: 0</span>
-                                      </div>
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {resultClickBreakdown.length > 0 ? (
-                                      <div className="space-y-2">
-                                        <div className="bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 px-3 py-2 rounded-lg text-center">
-                                          <span className="text-sm font-semibold text-orange-800 dark:text-orange-200">Total: {item.result_clicks}</span>
-                                        </div>
-                                        <Collapsible>
-                                          <CollapsibleTrigger asChild>
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              className="w-full text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                                              onClick={() => toggleSession(item.session_id, 'result')}
-                                            >
-                                              {resultExpanded ? (
-                                                <>
-                                                  <ChevronUp className="w-3 h-3 mr-1" />
-                                                  Hide breakdown
-                                                </>
-                                              ) : (
-                                                <>
-                                                  <ChevronDown className="w-3 h-3 mr-1" />
-                                                  View breakdown
-                                                </>
-                                              )}
-                                            </Button>
-                                          </CollapsibleTrigger>
-                                          <CollapsibleContent className="space-y-2 mt-2">
-                                            {resultClickBreakdown.map((item, idx) => (
-                                              <div key={idx} className="border border-border rounded p-2 bg-card">
-                                                <div className="text-xs font-medium mb-1 truncate" title={item.url}>
-                                                  {item.url.length > 40 ? item.url.substring(0, 40) + '...' : item.url}
-                                                </div>
-                                                <div className="flex gap-2 text-xs">
-                                                  <span className="text-blue-600 dark:text-blue-400">
-                                                    Total: {item.total}
-                                                  </span>
-                                                  <span className="text-purple-600 dark:text-purple-400">
-                                                    Unique: {item.unique}
-                                                  </span>
-                                                </div>
-                                              </div>
-                                            ))}
-                                          </CollapsibleContent>
-                                        </Collapsible>
-                                      </div>
-                                    ) : (
-                                      <div className="bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 px-3 py-2 rounded-lg text-center">
-                                        <span className="text-sm font-semibold text-orange-800 dark:text-orange-200">Total: 0</span>
-                                      </div>
-                                    )}
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    <span className="font-medium">
-                                      {Math.floor(((item as any).time_spent || 0) / 60)}m {((item as any).time_spent || 0) % 60}s
-                                    </span>
-                                  </TableCell>
-                                  <TableCell className="text-xs">
-                                    {new Date(item.timestamp).toLocaleString()}
-                                  </TableCell>
-                                </TableRow>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
+        {/* Session Analytics Table */}
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="p-4 border-b border-border">
+            <h3 className="font-semibold text-foreground">Session Analytics</h3>
           </div>
-        </main>
+
+          {loading ? (
+            <div className="p-8 text-center text-primary">Loading...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border">
+                    <TableHead>Session ID</TableHead>
+                    <TableHead>IP Address</TableHead>
+                    <TableHead>Country</TableHead>
+                    <TableHead>Source</TableHead>
+                    <TableHead>Device</TableHead>
+                    <TableHead className="text-right">Page Views</TableHead>
+                    <TableHead className="text-right">Total Clicks</TableHead>
+                    <TableHead className="text-right">Unique Clicks</TableHead>
+                    <TableHead className="text-right">Related Searches</TableHead>
+                    <TableHead className="text-right">Result Clicks</TableHead>
+                    <TableHead className="text-right">Time Spent</TableHead>
+                    <TableHead>Timestamp</TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {analytics.map((item) => {
+                    const relatedSearchBreakdown = getRelatedSearchBreakdown(item.session_id);
+                    const resultClickBreakdown = getResultClickBreakdown(item.session_id);
+                    const relatedExpanded = expandedSessions[`${item.session_id}-related`];
+                    const resultExpanded = expandedSessions[`${item.session_id}-result`];
+
+                    return (
+                      <TableRow key={item.id} className="border-border">
+                        <TableCell className="font-mono text-xs">
+                          {item.session_id.substring(0, 12)}...
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {item.ip_address}
+                        </TableCell>
+                        <TableCell>{item.country || "-"}</TableCell>
+                        <TableCell className="text-xs">{item.source || "-"}</TableCell>
+                        <TableCell>{item.device || "-"}</TableCell>
+                        <TableCell className="text-right">{item.page_views}</TableCell>
+                        <TableCell className="text-right">{item.clicks}</TableCell>
+                        <TableCell className="text-right">
+                          <span className="font-semibold text-primary">
+                            {item.unique_clicks || 0}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {relatedSearchBreakdown.length > 0 ? (
+                            <div className="space-y-2">
+                              <div className="bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 px-3 py-2 rounded-lg text-center">
+                                <span className="text-sm font-semibold text-green-800 dark:text-green-200">
+                                  Total: {item.related_searches}
+                                </span>
+                              </div>
+                              <Collapsible>
+                                <CollapsibleTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                                    onClick={() => toggleSession(item.session_id, 'related')}
+                                  >
+                                    {relatedExpanded ? (
+                                      <>
+                                        <ChevronUp className="w-3 h-3 mr-1" />
+                                        Hide breakdown
+                                      </>
+                                    ) : (
+                                      <>
+                                        <ChevronDown className="w-3 h-3 mr-1" />
+                                        View breakdown
+                                      </>
+                                    )}
+                                  </Button>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className="space-y-2 mt-2">
+                                  {relatedSearchBreakdown.map((item, idx) => (
+                                    <div key={idx} className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 p-2 rounded text-xs">
+                                      <div className="font-medium text-green-700 dark:text-green-300">{item.term}</div>
+                                      <div className="text-green-600 dark:text-green-400">
+                                        Unique: {item.unique} | Total: {item.total}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </CollapsibleContent>
+                              </Collapsible>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">0</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {resultClickBreakdown.length > 0 ? (
+                            <div className="space-y-2">
+                              <div className="bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 px-3 py-2 rounded-lg text-center">
+                                <span className="text-sm font-semibold text-orange-800 dark:text-orange-200">
+                                  Total: {item.result_clicks}
+                                </span>
+                              </div>
+                              <Collapsible>
+                                <CollapsibleTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                                    onClick={() => toggleSession(item.session_id, 'result')}
+                                  >
+                                    {resultExpanded ? (
+                                      <>
+                                        <ChevronUp className="w-3 h-3 mr-1" />
+                                        Hide breakdown
+                                      </>
+                                    ) : (
+                                      <>
+                                        <ChevronDown className="w-3 h-3 mr-1" />
+                                        View breakdown
+                                      </>
+                                    )}
+                                  </Button>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className="space-y-2 mt-2">
+                                  {resultClickBreakdown.map((item, idx) => (
+                                    <div key={idx} className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 p-2 rounded text-xs">
+                                      <div className="font-medium text-orange-700 dark:text-orange-300 truncate max-w-[150px]">
+                                        {item.url}
+                                      </div>
+                                      <div className="text-orange-600 dark:text-orange-400">
+                                        Unique: {item.unique} | Total: {item.total}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </CollapsibleContent>
+                              </Collapsible>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">0</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {item.time_spent ? `${Math.floor(item.time_spent / 60)}m ${item.time_spent % 60}s` : "-"}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {new Date(item.timestamp).toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
       </div>
-    </SidebarProvider>
+    </AdminLayout>
   );
 };
 

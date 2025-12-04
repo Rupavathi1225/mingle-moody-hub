@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Loader2, Download, Search, Mail } from "lucide-react";
+import { Loader2, Download, Search } from "lucide-react";
 import { format } from "date-fns";
 
 interface EmailCapture {
@@ -98,76 +99,74 @@ export default function AdminEmails() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AdminLayout title="Email Captures">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Mail className="h-8 w-8" />
-            Email Captures
-          </h1>
-          <p className="text-muted-foreground mt-1">
+    <AdminLayout title="Email Captures">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <p className="text-muted-foreground">
             {filteredEmails.length} email{filteredEmails.length !== 1 ? "s" : ""} captured
           </p>
-        </div>
-        <Button onClick={exportToCSV} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Export CSV
-        </Button>
-      </div>
-
-      <Card className="p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Search className="h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by email or page key..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
+          <Button onClick={exportToCSV} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
         </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Page Key</TableHead>
-                <TableHead>Date Captured</TableHead>
-                <TableHead>Country</TableHead>
-                <TableHead>Source</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEmails.length === 0 ? (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by email or page key..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+          </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No email captures found
-                  </TableCell>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Page Key</TableHead>
+                  <TableHead>Date Captured</TableHead>
+                  <TableHead>Country</TableHead>
+                  <TableHead>Source</TableHead>
                 </TableRow>
-              ) : (
-                filteredEmails.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.email}</TableCell>
-                    <TableCell className="text-xs font-mono">{item.page_key}</TableCell>
-                    <TableCell>
-                      {format(new Date(item.captured_at), "MMM dd, yyyy HH:mm")}
+              </TableHeader>
+              <TableBody>
+                {filteredEmails.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      No email captures found
                     </TableCell>
-                    <TableCell>{item.country || "N/A"}</TableCell>
-                    <TableCell>{item.source || "N/A"}</TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
-    </div>
+                ) : (
+                  filteredEmails.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.email}</TableCell>
+                      <TableCell className="text-xs font-mono">{item.page_key}</TableCell>
+                      <TableCell>
+                        {format(new Date(item.captured_at), "MMM dd, yyyy HH:mm")}
+                      </TableCell>
+                      <TableCell>{item.country || "N/A"}</TableCell>
+                      <TableCell>{item.source || "N/A"}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
+      </div>
+    </AdminLayout>
   );
 }

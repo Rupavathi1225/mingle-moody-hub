@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AdminSidebar } from "@/components/AdminSidebar";
+import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { LandingPage } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -56,58 +55,40 @@ const Admin = () => {
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AdminSidebar />
-        <main className="flex-1">
-          <header className="h-12 flex items-center border-b border-border px-4">
-            <SidebarTrigger className="mr-4" />
-            <h1 className="text-xl font-bold text-primary">Admin Panel</h1>
-          </header>
-
-          <div className="p-8">
-            <div className="max-w-4xl">
-              <h2 className="text-2xl font-bold text-foreground mb-6">
-                Landing Page Editor
-              </h2>
-
-              {loading ? (
-                <div className="text-primary">Loading...</div>
-              ) : (
-                <div className="space-y-6 bg-card p-6 rounded-lg border border-border">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Hero Title</Label>
-                    <Input
-                      id="title"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Enter hero title"
-                      className="bg-background border-border"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Hero Description</Label>
-                    <Textarea
-                      id="description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Enter hero description"
-                      rows={6}
-                      className="bg-background border-border"
-                    />
-                  </div>
-
-                  <Button onClick={handleSave} className="bg-primary text-primary-foreground">
-                    Save Changes
-                  </Button>
-                </div>
-              )}
-            </div>
+    <AdminLayout title="Landing Page Editor">
+      {loading ? (
+        <div className="text-primary">Loading...</div>
+      ) : (
+        <div className="max-w-4xl space-y-6 bg-card p-6 rounded-lg border border-border">
+          <div className="space-y-2">
+            <Label htmlFor="title">Hero Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter hero title"
+              className="bg-background border-border"
+            />
           </div>
-        </main>
-      </div>
-    </SidebarProvider>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Hero Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter hero description"
+              rows={6}
+              className="bg-background border-border"
+            />
+          </div>
+
+          <Button onClick={handleSave} className="bg-primary text-primary-foreground">
+            Save Changes
+          </Button>
+        </div>
+      )}
+    </AdminLayout>
   );
 };
 
